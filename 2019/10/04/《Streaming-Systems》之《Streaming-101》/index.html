@@ -130,7 +130,7 @@
 <p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig03_batchfixedwindows-15968ed45b739377364dfbba39f3ff17.jpg" alt></p>
 <p>但这样带来的问题就像之前讲过的，怎么能确保一个窗口的数据是完全的呢？</p>
 <h4 id="会话的情况（Session）"><a href="#会话的情况（Session）" class="headerlink" title="会话的情况（Session）"></a>会话的情况（Session）</h4><p>这种切割方式在处理会话的时候，问题就更严重了。所谓会话就是用户在一段时间内的活跃行为。按照下图所示，这种切割方式可能会造成用户同一个会话的数据被切割到不同的时间段了，这肯定是不允许的。</p>
-<p><img src="https://images2015.cnblogs.com/blog/735367/201705/735367-20170522093932273-1949777066.png" alt></p>
+<p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig04_batchsessions-d32b02f38b923052339bc6ddeb3d7c69.jpg" alt></p>
 <h3 id="用流引擎处理无限数据"><a href="#用流引擎处理无限数据" class="headerlink" title="用流引擎处理无限数据"></a>用流引擎处理无限数据</h3><p>Tyler Akidau 大神把流引擎处理无限数据分为四大类：1.时间无关（Time-agnostic）2.近似计算（approximation）3.通过process time作为窗口 4.通过event time作为窗口 接下来将会依次介绍这四种情况。</p>
 <h4 id="时间无关的"><a href="#时间无关的" class="headerlink" title="时间无关的"></a>时间无关的</h4><p>在这种情况下，只需要关注数据本身，对于数据所附带的时间因素则无需关注，因此批处理引擎其实也可以完美解决这种情况。</p>
 <p>一种典型的场景就是数据过滤了,比如你要统计一个商品的购买总数，那只需要把不是这种商品的数据过滤掉就好。</p>
@@ -138,7 +138,7 @@
 <p>另一种场景就是内联了(Inner Joins)。这种时候就是当一个流里的数据需要和另一个流里的数据进行结合再输出。</p>
 <p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig06_innerjoin-4e92dd8c27b65f3702c9ef30b96fe20b.jpg" alt></p>
 <h4 id="近似算法"><a href="#近似算法" class="headerlink" title="近似算法"></a>近似算法</h4><p>近似算法就是指求诸如 Top-N 这种场景。这种算法很有可能需要用到时间这一维度，比如求某段时间的购买量最高的商品。</p>
-<p><img src="https://images2015.cnblogs.com/blog/735367/201705/735367-20170522094023913-1591115071.png" alt></p>
+<p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig07_approximations-c5ab7dca60514156a63a62a4d11efb24.jpg" alt></p>
 <h4 id="把-processing-time-作为窗口"><a href="#把-processing-time-作为窗口" class="headerlink" title="把 processing time 作为窗口"></a>把 processing time 作为窗口</h4><p>在进行叙述如何用 processing time 作为窗口之前，先讲一下窗口有哪些分类。</p>
 <p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig08_windowing-01184b86c06843c382f6fc36316d81c0.jpg" alt></p>
 <p>第一种窗口就是固定窗口（fixed window），又称为滚动窗口（tumbling window），这种窗口的特点就是窗口大小是固定的，每个窗口之间相互独立。</p>
