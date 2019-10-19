@@ -148,9 +148,9 @@
 <p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig09_processingtimewindowing-ed2691e4602a28f0cbd395f90e2747cb.jpg" alt></p>
 <p>按照 processing time 生成窗口很简洁明了，就是按照系统的机器的系统时间，所以这种数据处理模式就不需要思考是否有数据延迟的情况，就很适合那种从机器角度考虑的事件，比如计算一个网站每秒中的访问量。</p>
 <h4 id="把-event-time-作为窗口"><a href="#把-event-time-作为窗口" class="headerlink" title="把 event time 作为窗口"></a>把 event time 作为窗口</h4><p>在前文中已经叙述过 processing time 的不足之处，就是按照现实世界的角度来说，可能会造成数据被分配到不正确的窗口之中。如下图所示，有两条数据被 processing time 分配到了错误的窗口之中，而在 event time 的情况下就正确了。所以正确性就是 event time 相较于 processing time 的一条优势。</p>
-<p><img src="https://images2015.cnblogs.com/blog/735367/201705/735367-20170522094105663-1487363494.png" alt></p>
+<p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig10_eventtimefixedwindows-1e30b3712f6189766a6ca7df44b4a2f9.jpg" alt></p>
 <p>还记得之前说的会话（session）的情况么？在 event time 的情况下就能被很优雅的处理，只要通过建立动态大小的窗口就行了。</p>
-<p><img src="https://images2015.cnblogs.com/blog/735367/201705/735367-20170522094122726-1330282451.png" alt></p>
+<p><img src="https://d3ansictanv2wj.cloudfront.net/post01_fig11_eventtimesessionwindows-f95374f3390bea838413c601ba39131f.jpg" alt></p>
 <p>可是天下没有免费的午餐，event time 有这么多优势，自然也会有自己的缺陷。第一：由于窗口的生命周期变得更大，所需的内存或磁盘空间也会变得更大。第二：就是之前提到过的如何确认一个窗口已经获取了它所需的所有数据，这点将会在之后进行讨论。</p>
 
       </div>
