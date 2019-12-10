@@ -90,6 +90,28 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2019/11/12/Flink-Async-I-O/">Flink Async I/O</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-11-12
+        </span></div>
+    </header>
+
+    <div class="post-content"><h1 id="为什么需要Flink-Async-I-O"><a href="#为什么需要Flink-Async-I-O" class="headerlink" title="为什么需要Flink Async I/O"></a>为什么需要Flink Async I/O</h1><p><img src="https://ci.apache.org/projects/flink/flink-docs-release-1.9/fig/async_io.svg" alt="Async I/O与传统I/O的区别"></p>
+<p>对于传统的阻塞I/O来说，每次和数据库进行一次就会被堵塞，下一次的I/O请求得等到上一次的完成才能发出，这对于流式系统的性能影响是很大的。</p>
+<p>而如果像图中所示，通过异步I/O的方式，并发得发出多个请求，这样就可以把一次请求的时间平摊到多个请求中了。</p>
+<!-- # Flink Async I/O 架构 -->
+<!-- ![架构图](https://cwiki.apache.org/confluence/download/attachments/65870673/future-wait-operator.jpg?version=1&modificationDate=1474192093000&api=v2)
+
+![AsyncCollectorBuffer架构图](https://cwiki.apache.org/confluence/download/attachments/65870673/async-task-buffer.jpg?version=1&modificationDate=1474192804000&api=v2) -->
+          <div class="read-more">
+            <a href="/2019/11/12/Flink-Async-I-O/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2019/10/04/《Streaming-Systems》之《Streaming-101》/">《Streaming Systems》之《Streaming 101》</a>
         </h1>
 
