@@ -105,16 +105,16 @@
       <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#本文要讲什么？"><span class="toc-text">本文要讲什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-Transformations"><span class="toc-text">What:Transformations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Where-Windowing"><span class="toc-text">Where: Windowing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Going-Streaming-When-and-How"><span class="toc-text">Going Streaming: When and How</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#When-The-Wonderful-Thing-About-Triggers-Is-Triggers-Are-Wonderful-Things-（这句话没借鉴黑格尔我是不信的）"><span class="toc-text">When: The Wonderful Thing About Triggers Is Triggers Are Wonderful Things!（这句话没借鉴黑格尔我是不信的）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Watermarks"><span class="toc-text">Watermarks</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#When-Early-On-Time-Late-Triggers-FTW"><span class="toc-text">When:Early/On-Time/Late Triggers FTW!</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#When-Allowed-Lateness-i-e-Garbage-Collection"><span class="toc-text">When:Allowed Lateness(i.e.,Garbage Collection)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-Accumulation"><span class="toc-text">How:Accumulation</span></a></li></ol>
     </div>
   </div><div class="post-content"><h2 id="本文要讲什么？"><a href="#本文要讲什么？" class="headerlink" title="本文要讲什么？"></a>本文要讲什么？</h2><p>前一篇《Streaming Systems》主要讲述了流系统该如何超过批系统，以及两个重要的概念–事件时间（event time）和窗口（window）。而在这一篇文章中将会介绍三个新的概念。</p>
-<ul>
+<ol>
 <li><p>触发器（triggers)</p>
 </li>
 <li><p>水位线（watermarks）</p>
 </li>
 <li><p>accumulation （不知道怎么翻，就用英语了）</p>
 </li>
-</ul>
+</ol>
 <p>而为了更加形象得介绍这三个概念，将会通过用四个问题的形式来进行。这四个问题对于处理无限数据集的情景来说都是非常重要的。</p>
-<ul>
+<ol>
 <li><p>什么样的数据才会被计算？（What results are calculated？）</p>
 </li>
 <li><p>事件时间的结果将在哪里进行计算？（Where in event time are results calculated?）</p>
@@ -123,19 +123,19 @@
 </li>
 <li><p>How do refinements of results relate? （如何关联每一个结果的改进？）</p>
 </li>
-</ul>
+</ol>
 <a id="more"></a>
 <h2 id="What-Transformations"><a href="#What-Transformations" class="headerlink" title="What:Transformations"></a>What:Transformations</h2><p>想象一个场景，有多个队伍参加一项手游比赛，每个队伍的成绩是该队所有成员得分之和。我们的任务就是建立一个流水线来计算队伍成绩。</p>
 <p>思考一下，如果是你该如何计算每组的总成绩呢？是不是应该先把每条数据进行分组，然后把每组的成绩加起来就好了呢？这个分组的过程其实就是一个转换（transformation）。常见的转换有一下三种形式</p>
 <p><img src="http://streamingbook.net/static/images/figures/stsy_0202.png" alt="Figure 2-2"></p>
-<ul>
+<ol>
 <li><p>根据每个元素一对一转换（element-wise）</p>
 </li>
 <li><p>分组（grouping）</p>
 </li>
 <li><p>多重转换（Composite）</p>
 </li>
-</ul>
+</ol>
 <p>对于这个例子来说，我们就只用到了分组这一种转换。这样在之后的计算中，计算对象就由之前的原始数据（比如string）变成了一个键值对（key-value），key是队伍名，而value则是队伍的成绩。</p>
 <p>用一组数据为例（之后的概念都会用到这个例子）。</p>
 <table>
@@ -225,47 +225,83 @@
 <h2 id="Where-Windowing"><a href="#Where-Windowing" class="headerlink" title="Where: Windowing"></a>Where: Windowing</h2><p>在我们从批处理转向流处理之前，我们再回顾一下上一篇的窗口概念。对于每一次数据的计算而言，其实都可以看成在一个窗口（Window）中发生的。就拿刚才的例子来说，我们可以把它看成一个[12:00-12:09]的窗口。而下面的动画，则是把全局计算切分成多个大小为两分钟的窗口同时计算的。所以我们可以看到有4个输出。<br><img src="http://streamingbook.net/static/images/figures/stsy_0205.mp4" alt="Figure 2-3"></p>
 <h2 id="Going-Streaming-When-and-How"><a href="#Going-Streaming-When-and-How" class="headerlink" title="Going Streaming: When and How"></a>Going Streaming: When and How</h2><p>之前讲的数据计算方面的方面都是基于批处理的，对于流数据而言，因为它无法等到所有数据都到了才触发运算，所以需要有一个东西告诉系统是时候进行计算了，而这个东西就是触发器（trigger）。</p>
 <h3 id="When-The-Wonderful-Thing-About-Triggers-Is-Triggers-Are-Wonderful-Things-（这句话没借鉴黑格尔我是不信的）"><a href="#When-The-Wonderful-Thing-About-Triggers-Is-Triggers-Are-Wonderful-Things-（这句话没借鉴黑格尔我是不信的）" class="headerlink" title="When: The Wonderful Thing About Triggers Is Triggers Are Wonderful Things!（这句话没借鉴黑格尔我是不信的）"></a>When: The Wonderful Thing About Triggers Is Triggers Are Wonderful Things!（这句话没借鉴黑格尔我是不信的）</h3><p>触发器其实是在机器时间这个维度（processing-time）告诉机器这时候应该对 window 里的数据进行计算了。常见的触发器分为两种。</p>
-<ul>
+<ol>
 <li><p>Repeated update triggers：即触发器根据某个维度重复进行触发，比如每条该窗口的数据来了就触发一次该窗口计算，亦或者每过一段时间就对触发窗口计算。</p>
 </li>
 <li><p>Completeness triggers: 这种触发器的触发条件是在确信某个窗口的数据已经全部到来，从某种角度而言它和批处理有类似之处，不过对象从全部数据变成了一个窗口的数据。</p>
 </li>
-</ul>
+</ol>
 <p>从实现的角度而言，Repeated update triggers相对而言比较容易实现，也比较容易理解，因此在流式系统中也是最常用的，接下来就先看看这种触发器的例子。</p>
 <p><img src="http://streamingbook.net/static/images/figures/stsy_0206.mp4" alt="Figure 2-4"></p>
 <p>上面这个图就表示每有一条新数据进入窗口，窗口就会进行一次更新运算。这种触发器在你想要较为实时获得每个窗口的结果时非常有用，不过<br>在某些时候，这种触发器会浪费很多资源。比如有两个队你想统计每个队的实时分数，每个队有上千万个成员，这时候你完全没必要在每条数据来临时都触发运算，可以每过1s或1min触发。解决方法有两种 aligned delays（每个窗口根据固定时延触发运算）和 unaligned delays（每个窗口根据接收到的数据有不同的时延），这两种方法各有利弊，就不在这里赘述了。</p>
 <p>然而对于这种触发器而言，它有一个致命的缺陷，那就是它无法决定什么时候停止更新这个窗口，也就无法把该窗口结果传递下去。</p>
 <h3 id="Watermarks"><a href="#Watermarks" class="headerlink" title="Watermarks"></a>Watermarks</h3><p>对于经常使用 Flink 用户来说，watermark 肯定不是一个陌生的词汇，那么什么是 watermark 呢？对于每个窗口来说，如果接收到了 watermark ，那么就可以认为它已经收到了所有属于它的数据，可以触发运算了。所以 watermark 就是一种 completeness trigger。<br>watermark 也分为两种。</p>
-<ul>
+<ol>
 <li><p>Perfect watermarks（完美 watermark ）:只有在用户完全知道自己的数据源是什么样的才可能构建出这种 watermark 。因此不会有延迟的数据。</p>
 </li>
 <li><p>Heuristic watermarks（启发式 watermark ）：上面那种情况对于流数据而言是极其少见的，更常见的是这种 watermark 。通常有这么一个函数F(P)-&gt;E。其中P是当前机器时间（Processing Time), 而E可以看成一个事件时间（Event Time），表明E时间之前的数据都已经收到了。</p>
 </li>
-</ul>
+</ol>
 <p>不难看出启发式 watermark 很有可能会导致数据遗漏，通过下图即可展示。</p>
 <p><img src="http://streamingbook.net/static/images/figures/stsy_0210.mp4" alt="Figure 2-5"></p>
 <p>上图左边是完美 watermark ，而右边是启发式 watermark。很明显，对于启发式的来说，由于数据9来的太晚，而 watermark 触发太早，导致第一个窗口的数据有误。这就是 watermark 的一大问题——过早触发运算。</p>
 <p>那完美 watermark 就真的完美么？从上图可以看出，对于[12:02, 12:04]的窗口来说，它的数据其实早就到了，可因为数据9迟迟不到，它也就迟迟无法进行运算。这也是 watermark 的第二个问题——太晚触发运算。</p>
 <h3 id="When-Early-On-Time-Late-Triggers-FTW"><a href="#When-Early-On-Time-Late-Triggers-FTW" class="headerlink" title="When:Early/On-Time/Late Triggers FTW!"></a>When:Early/On-Time/Late Triggers FTW!</h3><p>对于上述两种触发器而言，它们都有各自不同的缺点，那有没有一种完美的触发器呢？其实只要把这两种触发器合二为一即可。它的名字就是 early/on-time/late trigger。</p>
 <p>这种触发器会把每个窗口分成三种面板：</p>
-<ul>
+<ol>
 <li><p>Zero or more early panes（零个或多个早期面板）：通过 repeated update trigger ，在 watermark 来临之前，每遇到一条数据或每过一段时间就触发运算，并生成相应结果。</p>
 </li>
 <li><p>A single on-time pane（一个准时面板）：当 watermark 来临时，就生成该面板，表面该窗口的数据都已到达。</p>
 </li>
 <li><p>Zero or more late panes（零个或多个延迟面板）：当延迟数据来临时通过 repeated update trigger 触发运算，对于完美 watermark 来说这个面板是不存在的。</p>
 </li>
-</ul>
+</ol>
 <p>接着通过下图看看它是怎么工作的。</p>
 <p><img src="http://streamingbook.net/static/images/figures/stsy_0211.mp4" alt="Figure 2-5"></p>
 <p>可以看到之前 watermark 的两个问题都在这里被解决了。</p>
 <h3 id="When-Allowed-Lateness-i-e-Garbage-Collection"><a href="#When-Allowed-Lateness-i-e-Garbage-Collection" class="headerlink" title="When:Allowed Lateness(i.e.,Garbage Collection)"></a>When:Allowed Lateness(i.e.,Garbage Collection)</h3><p>到现在这个阶段，一切已经近乎完美了，不过还有最后一个小问题。由于流数据天生的不确定性，最后的延迟面板理论上需要一直维持下去，可是对于机器容量而言，它是有限的，因此不可能一直保持一个窗口而不把它进行回收。因此对于每一个窗口而言都需要设置一个最大延迟量，说明在这个时间段之后的数据都可以丢弃不用了。</p>
 <h2 id="How-Accumulation"><a href="#How-Accumulation" class="headerlink" title="How:Accumulation"></a>How:Accumulation</h2><p>最后讲讲在窗口中经常进行哪些运算。</p>
-<ul>
+<ol>
 <li>Discarding：每来一个新数据，就抛弃之前的数据。</li>
 <li>Accumulating：每来一个新数据，在上一个数据的基础上进行聚合，再输出。</li>
-<li>Accumulating and retracting: 每来一个新数据，在上一个数据的基础上先进行聚合，然后告诉下游抛弃之前的结果，用新的。<br>|  | Discarding | Accumulating | Accumulating and retracting |<br>| —- | —- | —– | ——— |<br>| input1 = 1 | 1 | 1 | 1 |<br>| input2 = 2 | 2 | 3 | 3,-1 |<br>| value of final pane | 2 | 3 | 3 |<br>| sum of all panes | 2 | 3 | 2 |</li>
-</ul>
+<li>Accumulating and retracting: 每来一个新数据，在上一个数据的基础上先进行聚合，然后告诉下游抛弃之前的结果，用新的。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Discarding</th>
+<th>Accumulating</th>
+<th>Accumulating and retracting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>input1 = 1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>input2 = 2</td>
+<td>2</td>
+<td>3</td>
+<td>3,-1</td>
+</tr>
+<tr>
+<td>value of final pane</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>sum of all panes</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
 
       </div>
       <div class="post-copyright">
